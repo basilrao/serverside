@@ -1,0 +1,170 @@
+<html>
+
+<head>
+    <title>Markssheet</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="http://ajax.cdnjs.com/ajax/libs/json2/20110223/json2.js"></script>
+    <style>
+        .customButton {
+            border: 1px solid gray;
+            padding: 2px 6px 2px 6px;
+            cursor: pointer;
+        }
+
+            .customButton:hover {
+                border: 1px solid black;
+                box-shadow: gray 2px 2px 5px;
+            }
+    </style>
+</head>
+
+<body>
+    <h1>Marksheet</h1>
+    <div>
+        <table>
+            <tr>
+                <td>
+                    <table>
+                        <tr>
+                            <td>
+                                <span>Enter the name of student :</span>
+                            </td>
+                            <td>
+                                <input type="text" id="nameOfStudent" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span>Enter the number of subjects : </span>
+                            </td>
+                            <td>
+                                <input type="number" id="noOfSubjects" min="1" onchange="UIPopulate()"
+                                       onkeyup="UIPopulate()" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <span onclick="Calculate()" class="customButton">Calculate</span>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td>
+                    <table>
+                        <tr>
+                            <td>
+                                <span>Min Marks Subject: </span>
+                            </td>
+                            <td>
+                                <input type="text" id="minMarksSubject" readonly="readonly" />
+                            </td>
+                            <td>
+                                <span>Min Marks: </span>
+                            </td>
+                            <td>
+                                <input type="text" id="minMarks" readonly="readonly" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span>Max Marks Subject: </span>
+                            </td>
+                            <td>
+                                <input type="text" id="maxMarksSubject" readonly="readonly" />
+                            </td>
+                            <td>
+                                <span>Max Marks: </span>
+                            </td>
+                            <td>
+                                <input type="text" id="maxMarks" readonly="readonly" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span>Percentage : </span>
+                            </td>
+                            <td>
+                                <input type="text" id="percentage" readonly="readonly" />
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <hr />
+    <div>
+        <table id="inputTable"></table>
+    </div>
+    <script>
+
+        function Calculate() {
+            var name = new Array();
+            var marks = new Array();
+
+            var id = "";
+            for (i = 0; i < $('#noOfSubjects').val(); i++) {
+                name[i] = document.getElementById('subjectName' + i).value;
+                marks[i] = document.getElementById('subjectMarksObtained' + i).value;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "Marksheet.asmx/CalculateData",
+                data: JSON.stringify({ name: name, marks:marks }),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    data = $.parseJSON(response.d);
+                    
+                    document.getElementById("maxMarksSubject").value = data[0];
+                    document.getElementById("maxMarks").value = data[1];
+
+                    document.getElementById("minMarksSubject").value = data[2];
+                    document.getElementById("minMarks").value = data[3];
+
+                    document.getElementById("percentage").value = data[4];
+                },
+                error: function (x, e) {
+                    console.log(xresponse);
+                }
+            });
+        }
+       
+
+
+        function UIPopulate() {
+            var noOfSubjects = $('#noOfSubjects').val();
+
+            var h = '';
+            for (i = 0; i < noOfSubjects; i++) {
+                h += '<tr>';
+
+                h += '<td>';
+                h += '<span>Subject ' + (i + 1) + ' -> </span>';
+                h += '</td>';
+
+                h += '<td>';
+                h += '<span>Name :</span>';
+                h += '</td>';
+
+                h += '<td>';
+                h += '<input type="text" id="subjectName' + i + '"/>';
+                h += '</td>';
+
+                h += '<td>';
+                h += '<span>Marks Obtained :</span>';
+                h += '</td>';
+
+                h += '<td>';
+                h += '<input type="number" min="0" max="100" id="subjectMarksObtained' + i + '"/>';
+                h += '</td>';
+
+                h += '</tr>';
+            }
+
+            $('#inputTable').html(h);
+        }
+    </script>
+</body>
+</html>
